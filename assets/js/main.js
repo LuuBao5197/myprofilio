@@ -1,21 +1,32 @@
+const FEATURED_REPOS = [
+  'qlhlCDHC',
+  'EShopMicroservice',
+  'Skippy_client',
+  'Skippy_backend',
+  'TrackMentalHealth_client',
+  'TrackMentalHealth_mobile',
+  'TrackMentalHealth',
+  'Runstoppable_AspireEdge',
+  'eProjectHK3',
+  'EProject3Client',
+];
+
 async function loadGithubProjects() {
   const username = 'LuuBao5197';
   const container = document.getElementById('github-projects');
   if (!container) return;
 
   try {
-    const res = await fetch(
-      `https://api.github.com/users/${username}/repos?sort=updated&per_page=6&type=public`
+    const results = await Promise.all(
+      FEATURED_REPOS.map(name =>
+        fetch(`https://api.github.com/repos/${username}/${name}`).then(r => {
+          if (!r.ok) throw new Error(`Repo ${name} not found`);
+          return r.json();
+        })
+      )
     );
-    if (!res.ok) throw new Error('GitHub API error');
-    const repos = await res.json();
 
-    if (!Array.isArray(repos) || repos.length === 0) {
-      container.innerHTML = '<p class="col-span-3 text-center font-body text-grey-20">No public repositories found.</p>';
-      return;
-    }
-
-    container.innerHTML = repos.map(repo => `
+    container.innerHTML = results.map(repo => `
       <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer"
          class="block rounded border border-grey-60 p-6 shadow transition-colors duration-200 hover:bg-primary group">
         <div class="flex items-center gap-2 pb-2">
